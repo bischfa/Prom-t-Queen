@@ -3,404 +3,403 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prom(pt)-Queen</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    <title>Prom(pt)-Queen: Royal Influence Edition</title>
+    <style>
+        :root {
+            --bg-color: #fcf8f3;
+            --pane-bg: #ffffff;
+            --text-color: #333333;
+            --label-color: #5d4037;
+            --border-color: #e0d8d0;
+            --accent-color: #6a0572;
+            --accent-color-hover: #4e0354;
+            --header-bg: #efece7;
+            --input-bg: #ffffff;
+            --input-border: #dcd7d0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --active-bg: #fff8e1;
+            --active-border: #dda420;
+            --active-text: #8b6508;
+            --sidebar-bg: #f5f2ed;
+            --sidebar-text: #5d4037;
+        }
+
+        body.dark-mode {
+            --bg-color: #1a1a2e;
+            --pane-bg: #272740;
+            --text-color: #e0e0e0;
+            --label-color: #b0c4de;
+            --border-color: #484860;
+            --accent-color: #c780e0;
+            --accent-color-hover: #b36ad0;
+            --header-bg: #32324a;
+            --input-bg: #3a3a55;
+            --input-border: #606080;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            --active-bg: #3d3d5c;
+            --active-border: #a27b2e;
+            --active-text: #ffd700;
+            --sidebar-bg: #161625;
+            --sidebar-text: #b0c4de;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        /* --- Header --- */
+        .header-container { height: 70px; display: flex; align-items: center; padding: 0 20px; background: var(--pane-bg); border-bottom: 1px solid var(--border-color); gap: 15px; flex-shrink: 0; }
+        .header-logo { height: 45px; }
+        h1 { font-size: 1.6rem; color: var(--accent-color); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin: 0; }
+        .author-logo { height: 30px; }
+        .header-controls { margin-left: auto; }
+
+        /* --- Layout --- */
+        .main-layout { display: flex; flex-grow: 1; overflow: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); overflow-y: auto; padding: 20px 0; }
+        .category-menu { list-style: none; }
+        .category-menu li { padding: 10px 20px; cursor: pointer; color: var(--sidebar-text); font-size: 0.85rem; border-left: 4px solid transparent; transition: 0.2s; }
+        .category-menu li:hover { background: rgba(106, 5, 114, 0.05); }
+        .category-menu li.active { background: rgba(106, 5, 114, 0.1); color: var(--accent-color); border-left-color: var(--accent-color); font-weight: 600; }
+        .category-menu li.has-content::after { content: ' 👑'; color: var(--active-border); font-size: 0.8rem; }
+
+        /* Content Area */
+        .content-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .pane { background: var(--pane-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
+        .pane-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        h2 { font-size: 0.9rem; color: var(--label-color); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Navigation Arrows (Richtig groß & funktional) */
+        .category-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; gap: 20px; }
+        .nav-arrow { 
+            background: var(--pane-bg); border: 2px solid var(--accent-color); border-radius: 50%; 
+            width: 60px; height: 60px; cursor: pointer; color: var(--accent-color); 
+            display: flex; align-items: center; justify-content: center; font-size: 2.2rem; 
+            transition: 0.2s; box-shadow: var(--shadow); flex-shrink: 0;
+        }
+        .nav-arrow:hover { background: var(--accent-color); color: white; transform: scale(1.1); }
+        .category-header h3 { font-size: 1.2rem; text-align: center; flex-grow: 1; color: var(--accent-color); }
+
+        /* Category Content */
+        .category-content { display: none; }
+        .category-content.active { display: block; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(15px); } to { opacity: 1; transform: translateX(0); } }
+        .cat-desc { font-size: 0.9rem; color: var(--label-color); margin-bottom: 20px; font-style: italic; }
+
+        /* Form Elements */
+        textarea { width: 100%; padding: 12px; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; border: 1px solid var(--input-border); border-radius: 8px; background: var(--input-bg); color: var(--text-color); resize: vertical; }
+        .option-group { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
+        input[type="text"] { flex-grow: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--input-border); font-size: 0.9rem; }
+        .info-text { display: block; font-size: 0.8rem; color: var(--label-color); margin-top: 4px; font-style: italic; line-height: 1.3; }
+
+        /* Preview Area */
+        #final-prompt { background: var(--header-bg); min-height: 220px; font-size: 0.9rem; }
+        #copy-button { background: var(--accent-color); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 700; position: relative; font-size: 1rem; }
+        #reset-button { background: #f0f0f0; border: 1px solid #ccc; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+        .copy-feedback { display: none; position: absolute; top: -40px; left: 50%; transform: translateX(-50%); background: #28a745; padding: 5px 12px; border-radius: 4px; color: white; font-size: 0.8rem; }
+
+        /* Theme Toggle */
+        .toggle-switch-container { cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .toggle-switch { width: 45px; height: 24px; background: var(--sidebar-text); border-radius: 12px; position: relative; display: flex; align-items: center; justify-content: space-between; padding: 0 5px; font-size: 10px; }
+        .toggle-switch::before { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; left: 3px; transition: 0.3s; }
+        body.dark-mode .toggle-switch::before { transform: translateX(21px); }
+    </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <img src="KI_krone.png" alt="Logo" class="header-logo">
+    <header class="header-container">
+        <img src="https://img.icons8.com/fluency/96/tiara.png" alt="Krone" class="header-logo">
         <h1>Prom(pt)-Queen</h1>
-        <span class="by-text">by</span>
-        <img src="fb.png" alt="Author Logo" class="author-logo">
-        
         <div class="header-controls">
-             <div id="theme-toggle-switch" class="toggle-switch-container" title="Light/Dark-Modus">
+             <div id="theme-toggle" class="toggle-switch-container">
                 <div class="toggle-switch"><span>💡</span><span>☀️</span></div>
             </div>
         </div>
-    </div>
+    </header>
 
     <div class="main-layout">
-
         <aside class="sidebar">
-            <ul class="category-menu">
-                <li class="active" data-target="cat-rolle">1. Rolle & Expertise</li>
-                <li data-target="cat-kontext">2. Kontext & Branche</li>
-                <li data-target="cat-format">3. Ausgabeformat</li>
-                <li data-target="cat-beispiele">4. Beispiele & Belege</li>
-                <li data-target="cat-cot">5. Schritt-für-Schritt (CoT)</li>
-                <li data-target="cat-ton">6. Ton, Stil & Emotion</li>
-                <li data-target="cat-regeln">7. Regeln & Limits</li>
-                <li data-target="cat-zielgruppe">8. Zielgruppe & Sprache</li>
-                <li data-target="cat-kreativ">9. Kreativität</li>
-                <li data-target="cat-perspektive">10. Perspektive</li>
-                <li data-target="cat-zeit">11. Zeit & Priorität</li>
-                <li data-target="cat-umsetzung">12. Praktische Umsetzung</li>
-                <li data-target="cat-vergleich">13. Vergleich & Bewertung</li>
-                <li data-target="cat-lernziel">14. Lernziel & Checks</li>
-                <li data-target="cat-umfang">15. Umfang & Länge</li>
-                <li data-target="cat-interaktiv">16. Interaktivität</li>
+            <ul class="category-menu" id="side-menu">
+                <li class="active" data-target="cat-1">1. Rolle & Expertise</li>
+                <li data-target="cat-2">2. Kontext & Branche</li>
+                <li data-target="cat-3">3. Ausgabeformat</li>
+                <li data-target="cat-4">4. Beispiele & Belege</li>
+                <li data-target="cat-5">5. Schritt-für-Schritt</li>
+                <li data-target="cat-6">6. Ton & Emotion</li>
+                <li data-target="cat-7">7. Regeln & Limits</li>
+                <li data-target="cat-8">8. Zielgruppe</li>
+                <li data-target="cat-9">9. Kreativität</li>
+                <li data-target="cat-10">10. Perspektive</li>
+                <li data-target="cat-11">11. Zeit & Priorität</li>
+                <li data-target="cat-12">12. Praktische Umsetzung</li>
+                <li data-target="cat-13">13. Bewertung</li>
+                <li data-target="cat-14">14. Lernziel & Checks</li>
+                <li data-target="cat-15">15. Umfang & Länge</li>
+                <li data-target="cat-16">16. Interaktivität</li>
+                <li data-target="cat-17">17. Royal Hacks ⚡</li>
+                <li data-target="cat-18">18. Management-Klarheit</li>
+                <li data-target="cat-19">19. Überzeugende Dramaturgie</li>
+                <li data-target="cat-20">20. Einwände & Widerstand</li>
+                <li data-target="cat-21">21. Business Impact</li>
             </ul>
         </aside>
 
         <main class="content-area">
-
-            <div class="pane static-pane">
+            <div class="pane">
                 <div class="pane-header">
                     <h2>Basis-Prompt</h2>
-                    <button id="reset-button" title="Alles leeren">🗑️ Zurücksetzen</button>
+                    <button id="reset-button">🗑️ Reset</button>
                 </div>
-                <textarea id="base-prompt" placeholder="Dein Grundbefehl hier rein... (z.B. 'Erstelle einen Trainingsplan')"></textarea>
+                <textarea id="base-prompt" rows="3" placeholder="Eure Majestät, was ist der Grundbefehl?"></textarea>
             </div>
 
-            <div class="pane dynamic-pane" id="enhancer-form">
+            <div class="pane" id="enhancer-form">
                 
-                <div id="cat-rolle" class="category-content active">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>1. Rolle & Expertise</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Gib der KI eine Persona. Das aktiviert spezifisches Fachwissen.</p>
-                    <div class="option-group">
-                        <input type="checkbox" id="role-check" data-target="role-input">
-                        <label for="role-check">Expertenrolle zuweisen</label>
-                        <input type="text" id="role-input" placeholder="z.B. Senior Marketing Manager, Ernährungsberater">
-                    </div>
-                    <small class="info-text">Die KI wird aus der Sicht dieser Person antworten und deren Erfahrung nutzen.</small>
+                <div id="cat-1" class="category-content active">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>1. Rolle & Expertise</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="role-check"><label>Persona:</label><input type="text" id="role-input" placeholder="z.B. Senior Consultant"></div>
                 </div>
 
-                <div id="cat-kontext" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>2. Kontext & Branche</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Je mehr Hintergrundinfos die KI hat, desto passender die Antwort.</p>
-                    <div class="option-block">
-                        <div class="option-group">
-                            <input type="checkbox" id="context-check" data-target="context-input">
-                            <label for="context-check">Hintergrundsituation</label>
-                            <input type="text" id="context-input" placeholder="z.B. Wir sind ein kleines Startup mit wenig Budget...">
-                        </div>
-                        <small class="info-text">Beschreibe die Ausgangslage kurz, damit die KI nicht raten muss.</small>
-                    </div>
-                    <div class="option-block" style="margin-top: 15px;">
-                        <div class="option-group">
-                            <input type="checkbox" id="branche-check" data-target="branche-input">
-                            <label for="branche-check">Branche / Industrie</label>
-                            <input type="text" id="branche-input" placeholder="z.B. Automobil, E-Commerce, Handwerk">
-                        </div>
-                        <small class="info-text">Sorgt für passenden Fachjargon und relevante Branchen-Beispiele.</small>
-                    </div>
+                <div id="cat-2" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>2. Kontext & Branche</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="context-check"><label>Situation:</label><input type="text" id="context-input" placeholder="z.B. Strategie-Meeting"></div>
+                    <div class="option-group"><input type="checkbox" id="branche-check"><label>Branche:</label><input type="text" id="branche-input" placeholder="z.B. Automotive"></div>
                 </div>
 
-                <div id="cat-format" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>3. Ausgabeformat</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Bestimme exakt, wie das Ergebnis aussehen soll.</p>
+                <div id="cat-3" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>3. Ausgabeformat</h3><button class="nav-arrow next-cat">&#8594;</button></div>
                     <div class="checkbox-grid">
-                        <div class="option-block">
-                            <input type="checkbox" id="format-markdown"><label for="format-markdown">Markdown</label>
-                            <small class="info-text">Saubere Formatierung mit Überschriften, Fettschrift und Listen.</small>
-                        </div>
-                        <div class="option-block">
-                            <input type="checkbox" id="format-json"><label for="format-json">JSON Format</label>
-                            <small class="info-text">Strukturierte Daten für Programmierer (Maschinenlesbar).</small>
-                        </div>
-                        <div class="option-block">
-                            <input type="checkbox" id="format-table"><label for="format-table">Tabelle</label>
-                            <small class="info-text">Stellt Informationen übersichtlich in Spalten und Zeilen dar.</small>
-                        </div>
-                        <div class="option-block">
-                            <input type="checkbox" id="format-code"><label for="format-code">Reiner Code</label>
-                            <small class="info-text">Gibt nur den Quellcode aus, ohne lange Erklärungen drumherum.</small>
-                        </div>
-                    </div>
-                    <div class="option-group" style="margin-top: 15px;">
-                        <input type="checkbox" id="format-custom-check">
-                        <label for="format-custom-check">Eigenes Format:</label>
-                        <input type="text" id="format-custom-input" placeholder="z.B. CSV, HTML-Liste, Gedicht">
+                        <div class="option-group"><input type="checkbox" id="f-md"><label>Markdown</label></div>
+                        <div class="option-group"><input type="checkbox" id="f-table"><label>Tabelle</label></div>
+                        <div class="option-group"><input type="checkbox" id="f-json"><label>JSON</label></div>
                     </div>
                 </div>
 
-                <div id="cat-beispiele" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>4. Beispiele & Belege</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Zeige der KI, was du erwartest, oder fordere Beweise an.</p>
-                    <div class="option-block">
-                        <div class="option-group">
-                            <input type="checkbox" id="fewshot-check" data-target="fewshot-input">
-                            <label for="fewshot-check">Few-Shot Beispiele</label>
-                            <input type="text" id="fewshot-input" placeholder="z.B. Input: A, Output: B">
-                        </div>
-                        <small class="info-text">Der effektivste Weg, der KI ein komplexes Format beizubringen: Mach es ihr einmal vor.</small>
-                    </div>
-                    <div class="checkbox-grid" style="margin-top:15px;">
-                        <div class="option-block">
-                            <input type="checkbox" id="belege-beispiel"><label for="belege-beispiel">Praxisbeispiele</label>
-                            <small class="info-text">Fordert konkrete Fallstudien oder reale Anwendungsfälle.</small>
-                        </div>
-                        <div class="option-block">
-                            <input type="checkbox" id="belege-fakten"><label for="belege-fakten">Zahlen & Fakten</label>
-                            <small class="info-text">Verlangt nach datenbasierten Aussagen statt nur Meinungen.</small>
-                        </div>
-                    </div>
+                <div id="cat-4" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>4. Beispiele & Belege</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="ex-check"><label>Beispiel:</label><input type="text" id="ex-input" placeholder="Input -> Output"></div>
                 </div>
 
-                <div id="cat-cot" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>5. Schritt-für-Schritt Denken (CoT)</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Der "Turbo-Knopf" für Logikaufgaben.</p>
-                    <div class="option-block">
-                        <div class="option-group">
-                            <input type="checkbox" id="cot-check">
-                            <label for="cot-check"><strong>Denkprozess offenlegen</strong></label>
-                        </div>
-                        <small class="info-text">Zwingt die KI, erst laut "nachzudenken", bevor sie antwortet. Reduziert Flüchtigkeitsfehler bei Mathe oder Logik massiv.</small>
-                    </div>
+                <div id="cat-5" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>5. Schritt-für-Schritt</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="cot-check"><label>Denkprozess offenlegen (Chain of Thought)</label></div>
                 </div>
 
-                <div id="cat-ton" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>6. Ton, Stil & Emotion</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Wie soll die Antwort "klingen"?</p>
+                <div id="cat-6" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>6. Ton & Emotion</h3><button class="nav-arrow next-cat">&#8594;</button></div>
                     <div class="checkbox-grid">
-                        <div class="option-block"><input type="checkbox" id="ton-pro"><label for="ton-pro">Professionell</label><small class="info-text">Sachlich, distanziert, Business-like.</small></div>
-                        <div class="option-block"><input type="checkbox" id="ton-locker"><label for="ton-locker">Locker</label><small class="info-text">Duz-Kultur, freundlich, zugänglich.</small></div>
-                        <div class="option-block"><input type="checkbox" id="ton-knapp"><label for="ton-knapp">Knapp</label><small class="info-text">Kein Geschwafel, nur Fakten.</small></div>
-                        <div class="option-block"><input type="checkbox" id="ton-detail"><label for="ton-detail">Detailliert</label><small class="info-text">Lange, umfassende Erklärungen.</small></div>
-                        <div class="option-block"><input type="checkbox" id="emo-empathie"><label for="emo-empathie">Empathisch</label><small class="info-text">Zeigt Verständnis für Gefühle.</small></div>
-                        <div class="option-block"><input type="checkbox" id="emo-motivation"><label for="emo-motivation">Motivierend</label><small class="info-text">Ermutigender "Coach"-Tonfall.</small></div>
+                        <div class="option-group"><input type="checkbox" id="t-pro"><label>Professionell</label></div>
+                        <div class="option-group"><input type="checkbox" id="t-locker"><label>Locker</label></div>
+                        <div class="option-group"><input type="checkbox" id="t-emo"><label>Empathisch</label></div>
                     </div>
                 </div>
 
-                 <div id="cat-regeln" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>7. Regeln & Einschränkungen</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Setze harte Leitplanken für die KI.</p>
-                    <div class="option-block">
-                        <div class="option-group">
-                            <input type="checkbox" id="rules-check" data-target="rules-input">
-                            <label for="rules-check">Gebote</label>
-                            <input type="text" id="rules-input" placeholder="z.B. Nutze nur deutsche Quellen">
-                        </div>
-                        <small class="info-text">Was muss die KI unbedingt tun (Pflicht)?</small>
-                    </div>
-                    <div class="option-block" style="margin-top: 15px;">
-                        <div class="option-group">
-                            <input type="checkbox" id="rules-tabu-check" data-target="rules-tabu-input">
-                            <label for="rules-tabu-check">Verbote</label>
-                            <input type="text" id="rules-tabu-input" placeholder="z.B. Vermeide Fachjargon, keine Listen">
-                        </div>
-                        <small class="info-text">Sag der KI explizit, was sie NICHT tun darf (Tabu).</small>
-                    </div>
+                <div id="cat-7" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>7. Regeln & Limits</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="r-check"><label>Verbot:</label><input type="text" id="r-input" placeholder="z.B. keine Anglizismen"></div>
                 </div>
 
-                <div id="cat-zielgruppe" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>8. Zielgruppe & Sprache</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Für wen ist die Antwort gedacht?</p>
-                    <div class="option-block">
-                        <div class="option-group">
-                            <input type="checkbox" id="audience-check" data-target="audience-input">
-                            <label for="audience-check">Zielgruppe definieren:</label>
-                            <input type="text" id="audience-input" placeholder="z.B. 10-jährige Schüler, CEO, Experten">
-                        </div>
-                        <small class="info-text">Die KI passt Wortwahl und Komplexität automatisch an den Leser an.</small>
-                    </div>
-                    <hr style="margin: 15px 0; border:none; border-top:1px solid var(--border-color);">
+                <div id="cat-8" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>8. Zielgruppe</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="z-check"><label>Für wen:</label><input type="text" id="z-input" placeholder="z.B. CEO, Studenten"></div>
+                </div>
+
+                <div id="cat-9" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>9. Kreativität</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="k-high"><label>Kreativer Freiraum (High Temp)</label></div>
+                </div>
+
+                <div id="cat-10" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>10. Perspektive</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="p-devil"><label>Advocatus Diaboli (Kritisch)</label></div>
+                </div>
+
+                <div id="cat-11" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>11. Zeit & Priorität</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="zp-prio"><label>Nach Wichtigkeit sortieren</label></div>
+                </div>
+
+                <div id="cat-12" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>12. Praktische Umsetzung</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="u-steps"><label>Konkrete Umsetzungsschritte</label></div>
+                </div>
+
+                <div id="cat-13" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>13. Bewertung</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="v-procon"><label>Pro & Contra Analyse</label></div>
+                </div>
+
+                <div id="cat-14" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>14. Lernziel & Checks</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="l-quiz"><label>Verständnis-Check am Ende</label></div>
+                </div>
+
+                <div id="cat-15" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>15. Umfang & Länge</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="un-deep"><label>Tiefenanalyse (Sehr lang)</label></div>
+                </div>
+
+                <div id="cat-16" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>16. Interaktivität</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="i-ask"><label>Rückfragen vorab stellen</label></div>
+                </div>
+
+                <div id="cat-17" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>17. Royal Hacks ⚡</h3><button class="nav-arrow next-cat">&#8594;</button></div>
                     <div class="checkbox-grid">
-                         <div class="option-block">
-                             <input type="checkbox" id="lang-simple"><label for="lang-simple">Einfache Sprache (ELI5)</label>
-                             <small class="info-text">"Explain Like I'm 5". Maximale Verständlichkeit.</small>
-                         </div>
-                         <div class="option-block">
-                             <input type="checkbox" id="lang-metapher"><label for="lang-metapher">Metaphern nutzen</label>
-                             <small class="info-text">Erklärt komplizierte Konzepte durch bildhafte Vergleiche.</small>
-                         </div>
+                        <div class="option-group"><input type="checkbox" id="h-human" data-code="/HUMAN"><label>/HUMAN</label></div>
+                        <div class="option-group"><input type="checkbox" id="h-eli5" data-code="/ELI5"><label>/ELI5</label></div>
+                        <div class="option-group"><input type="checkbox" id="h-tldr" data-code="/TLDR"><label>/TLDR</label></div>
+                        <div class="option-group"><input type="checkbox" id="h-plain" data-code="/PLAIN"><label>/PLAIN</label></div>
                     </div>
                 </div>
 
-                <div id="cat-kreativ" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>9. Kreativität</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Wie "wild" darf die KI fantasieren?</p>
+                <div id="cat-18" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>18. Management-Klarheit</h3><button class="nav-arrow next-cat">&#8594;</button></div>
                     <div class="checkbox-grid">
-                        <div class="option-block">
-                            <input type="checkbox" id="creative-on"><label for="creative-on">Sehr Kreativ (Out-of-the-Box)</label>
-                            <small class="info-text">Gut für Ideenfindung, riskant für Fakten.</small>
-                        </div>
-                        <div class="option-block">
-                            <input type="checkbox" id="creative-off"><label for="creative-off">Konservativ (Auf Nummer sicher)</label>
-                            <small class="info-text">Bleibt bei bekannten, etablierten Lösungen.</small>
-                        </div>
+                        <div class="option-group"><input type="checkbox" id="w-sum"><label>Mgmt Summary</label></div>
+                        <div class="option-group"><input type="checkbox" id="w-one"><label>One-Slide-Story</label></div>
+                        <div class="option-group"><input type="checkbox" id="w-bullets"><label>C-Level Bullets</label></div>
                     </div>
                 </div>
 
-                <div id="cat-perspektive" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>10. Perspektive & Sichtweise</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Hilft gegen einseitige Antworten.</p>
-                    <div class="checkbox-grid">
-                        <div class="option-block">
-                            <input type="checkbox" id="persp-multi"><label for="persp-multi">Multiple Perspektiven</label>
-                            <small class="info-text">Betrachtet das Thema aus mehreren Blickwinkeln (z.B. Kunde vs. Verkäufer).</small>
-                        </div>
-                        <div class="option-block">
-                            <input type="checkbox" id="persp-kritisch"><label for="persp-kritisch">Advocatus Diaboli</label>
-                            <small class="info-text">Die KI sucht aktiv nach Gegenargumenten, Risiken und Schwachstellen.</small>
-                        </div>
-                    </div>
+                <div id="cat-19" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>19. Überzeugende Dramaturgie</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="w-nar"><label>Narrativ: Ist-Zustand zu Wirkung</label></div>
                 </div>
 
-                <div id="cat-zeit" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>11. Zeitrahmen & Priorisierung</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Bringt Struktur in lange Listen.</p>
-                    <div class="checkbox-grid">
-                        <div class="option-block">
-                            <input type="checkbox" id="prio-check"><label for="prio-check">Nach Wichtigkeit sortieren</label>
-                            <small class="info-text">Das Wichtigste kommt zuerst (Top-Down Prinzip).</small>
-                        </div>
-                        <div class="option-block">
-                            <input type="checkbox" id="zeit-check"><label for="zeit-check">Zeitlich einordnen</label>
-                            <small class="info-text">Unterteilt in kurz-, mittel- und langfristige Maßnahmen.</small>
-                        </div>
-                    </div>
+                <div id="cat-20" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>20. Einwände & Widerstand</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="w-cfo"><label>Skeptische CFO-Perspektive</label></div>
                 </div>
 
-                <div id="cat-umsetzung" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>12. Praktische Umsetzung</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Vom Wissen zum Handeln.</p>
-                    <div class="checkbox-grid">
-                        <div class="option-block"><input type="checkbox" id="praxis-brainstorm"><label for="praxis-brainstorm">Brainstorming</label><small class="info-text">Liefert eine reine Ideenliste (Quantität vor Qualität).</small></div>
-                        <div class="option-block"><input type="checkbox" id="praxis-schritte"><label for="praxis-schritte">Anleitung</label><small class="info-text">Konkrete Schritt-für-Schritt Handlungsanweisung.</small></div>
-                        <div class="option-block"><input type="checkbox" id="praxis-tools"><label for="praxis-tools">Tools</label><small class="info-text">Nennt Software, Webseiten oder Werkzeuge die helfen.</small></div>
-                        <div class="option-block"><input type="checkbox" id="praxis-fehler"><label for="praxis-fehler">Fehlerwarnung</label><small class="info-text">Weist auf typische Fallstricke hin, die man vermeiden sollte.</small></div>
-                    </div>
-                </div>
-
-                <div id="cat-vergleich" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>13. Vergleich & Bewertung</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Hilft bei Entscheidungen.</p>
-                    <div class="checkbox-grid">
-                         <div class="option-block">
-                             <input type="checkbox" id="compare-proscons"><label for="compare-proscons">Pro & Contra</label>
-                             <small class="info-text">Klassische Gegenüberstellung von Vor- und Nachteilen.</small>
-                         </div>
-                         <div class="option-block">
-                             <input type="checkbox" id="compare-alt"><label for="compare-alt">Alternativen</label>
-                             <small class="info-text">Schlägt andere Lösungswege vor, an die man vielleicht nicht gedacht hat.</small>
-                         </div>
-                    </div>
-                </div>
-
-                <div id="cat-lernziel" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>14. Lernziel & Checks</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Sichert ab, dass die Antwort verstanden wurde.</p>
-                    <div class="checkbox-grid">
-                        <div class="option-block">
-                            <input type="checkbox" id="lern-check"><label for="lern-check">Verständnisfragen</label>
-                            <small class="info-text">Die KI testet dich am Ende mit 1-2 Fragen zum Thema.</small>
-                        </div>
-                        <div class="option-block">
-                            <input type="checkbox" id="lern-summary"><label for="lern-summary">Zusammenfassung (TL;DR)</label>
-                            <small class="info-text">Fügt am Ende eine ultrakurze Zusammenfassung für Eilige hinzu.</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="cat-umfang" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>15. Umfang & Länge</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Steuert die Ausführlichkeit.</p>
-                     <div class="checkbox-grid">
-                        <div class="option-block"><input type="checkbox" id="len-kurz"><label for="len-kurz">Sehr Kurz</label><small class="info-text">Maximal Tweet-Länge.</small></div>
-                        <div class="option-block"><input type="checkbox" id="len-mittel"><label for="len-mittel">Mittel</label><small class="info-text">Standardlänge (2-3 Absätze).</small></div>
-                        <div class="option-block"><input type="checkbox" id="len-lang"><label for="len-lang">Lang</label><small class="info-text">Ausführlicher Essay oder Artikel.</small></div>
-                        <div class="option-block"><input type="checkbox" id="len-extrem"><label for="len-extrem">Extrem</label><small class="info-text">Umfassende Recherchedokumentation.</small></div>
-                    </div>
-                </div>
-
-                <div id="cat-interaktiv" class="category-content">
-                    <div class="category-header">
-                        <button class="nav-arrow prev-cat" title="Zurück">&#8592;</button>
-                        <h3>16. Interaktivität</h3>
-                        <button class="nav-arrow next-cat" title="Weiter">&#8594;</button>
-                    </div>
-                    <p class="cat-desc">Macht aus einem Monolog einen Dialog.</p>
-                    <div class="checkbox-grid">
-                        <div class="option-block">
-                            <input type="checkbox" id="inter-ask"><label for="inter-ask">Rückfragen</label>
-                            <small class="info-text">Die KI darf stoppen und nachfragen, bevor sie eine falsche Antwort gibt.</small>
-                        </div>
-                        <div class="option-block">
-                            <input type="checkbox" id="inter-next"><label for="inter-next">Nächste Schritte</label>
-                            <small class="info-text">Die KI schlägt vor, was man als nächstes fragen könnte.</small>
-                        </div>
-                    </div>
+                <div id="cat-21" class="category-content">
+                    <div class="category-header"><button class="nav-arrow prev-cat">&#8592;</button><h3>21. Business Impact</h3><button class="nav-arrow next-cat">&#8594;</button></div>
+                    <div class="option-group"><input type="checkbox" id="w-dec"><label>1-Page Decision Paper</label></div>
                 </div>
 
             </div>
 
-            <div class="pane static-pane preview-pane-container">
+            <div class="pane">
                 <div class="preview-header">
-                    <h2>Live-Vorschau</h2>
+                    <h2>Königliches Dekret</h2>
                     <button id="copy-button">
                         <span class="copy-text">📋 Kopieren</span>
-                        <span class="copy-feedback">✅ Kopiert!</span>
+                        <span class="copy-feedback">✅ Erledigt!</span>
                     </button>
                 </div>
-                <textarea id="final-prompt" readonly placeholder="Hier erscheint dein fertiger Mega-Prompt..."></textarea>
+                <textarea id="final-prompt" readonly placeholder="Der fertige Prompt erscheint hier..."></textarea>
             </div>
-
         </main>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const baseInput = document.getElementById('base-prompt');
+            const finalOutput = document.getElementById('final-prompt');
+            const sideMenu = document.getElementById('side-menu');
+            const categories = document.querySelectorAll('.category-content');
+            const menuItems = document.querySelectorAll('.category-menu li');
+
+            // --- Navigation Logic ---
+            function showCategory(targetId) {
+                const targetPane = document.getElementById(targetId);
+                const targetLi = document.querySelector(`[data-target="${targetId}"]`);
+                if (!targetPane || !targetLi) return;
+
+                categories.forEach(c => c.classList.remove('active'));
+                menuItems.forEach(m => m.classList.remove('active'));
+                
+                targetPane.classList.add('active');
+                targetLi.classList.add('active');
+            }
+
+            sideMenu.onclick = (e) => { if(e.target.dataset.target) showCategory(e.target.dataset.target); };
+
+            document.querySelectorAll('.next-cat').forEach(btn => {
+                btn.onclick = () => {
+                    const activeLi = document.querySelector('.category-menu li.active');
+                    if(activeLi.nextElementSibling) showCategory(activeLi.nextElementSibling.dataset.target);
+                };
+            });
+
+            document.querySelectorAll('.prev-cat').forEach(btn => {
+                btn.onclick = () => {
+                    const activeLi = document.querySelector('.category-menu li.active');
+                    if(activeLi.previousElementSibling) showCategory(activeLi.previousElementSibling.dataset.target);
+                };
+            });
+
+            // --- Generation Logic (Hier wurden die IDs repariert!) ---
+            function update() {
+                const base = baseInput.value.trim();
+                let shortcuts = [];
+                let mods = [];
+
+                // 17 Hacks
+                ['h-human', 'h-eli5', 'h-tldr', 'h-plain'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el && el.checked) shortcuts.push(el.dataset.code);
+                });
+
+                // Standard Kategorien sammeln
+                if(document.getElementById('role-check').checked) mods.push(`Persona: ${document.getElementById('role-input').value || 'Experte'}.`);
+                if(document.getElementById('context-check').checked) mods.push(`Kontext: ${document.getElementById('context-input').value}`);
+                if(document.getElementById('branche-check').checked) mods.push(`Branche: ${document.getElementById('branche-input').value}`);
+                if(document.getElementById('f-md').checked) mods.push("Format: Nutze Markdown.");
+                if(document.getElementById('f-table').checked) mods.push("Format: Erstelle eine Tabelle.");
+                if(document.getElementById('ex-check').checked) mods.push(`Beispiel: ${document.getElementById('ex-input').value}`);
+                if(document.getElementById('cot-check').checked) mods.push("Logik: Nutze Chain-of-Thought (Schritt-für-Schritt).");
+                if(document.getElementById('t-pro').checked) mods.push("Stil: Professionell.");
+                if(document.getElementById('t-locker').checked) mods.push("Stil: Locker/Duz-Kultur.");
+                if(document.getElementById('r-check').checked) mods.push(`Verbot: ${document.getElementById('r-input').value}`);
+                if(document.getElementById('z-check').checked) mods.push(`Zielgruppe: ${document.getElementById('z-input').value}`);
+                if(document.getElementById('k-high').checked) mods.push("Kreativität: Sei sehr kreativ/Out-of-the-box.");
+                if(document.getElementById('p-devil').checked) mods.push("Perspektive: Handle als Advocatus Diaboli.");
+                if(document.getElementById('zp-prio').checked) mods.push("Priorität: Sortiere nach Wichtigkeit.");
+                if(document.getElementById('u-steps').checked) mods.push("Umsetzung: Erstelle einen Aktionsplan.");
+                if(document.getElementById('v-procon').checked) mods.push("Bewertung: Pro & Contra Liste.");
+                if(document.getElementById('l-quiz').checked) mods.push("Check: Stelle Verständnisfragen am Ende.");
+                if(document.getElementById('un-deep').checked) mods.push("Umfang: Erstelle eine Tiefenanalyse.");
+                if(document.getElementById('i-ask').checked) mods.push("Interaktion: Stelle Rückfragen, bevor du die finale Antwort gibst.");
+
+                // Warwitz Kategorien (id="w-one" etc. gefixt!)
+                if(document.getElementById('w-sum').checked) mods.push("Management-Klarheit: Schreibe eine prägnante Zusammenfassung für ein Steering Committee.");
+                if(document.getElementById('w-one').checked) mods.push("Management-Klarheit: Erstelle eine One-Slide-Storyline mit Headline, Kernbotschaften und Entscheidungsimplikationen.");
+                if(document.getElementById('w-bullets').checked) mods.push("Management-Klarheit: Fasse die Analyse in fünf vorstandstauglichen Bulletpoints ohne Jargon zusammen.");
+                if(document.getElementById('w-nar').checked) mods.push("Dramaturgie: Entwickle ein Narrativ (Ist-Zustand → Herausforderung → Erkenntnis → Empfehlung → Wirkung).");
+                if(document.getElementById('w-cfo').checked) mods.push("Souveränität: Nimm die Perspektive eines skeptischen CFOs ein und antizipiere kritische Einwände.");
+                if(document.getElementById('w-dec').checked) mods.push("Business Impact: Erstelle ein einseitiges Decision Paper mit Optionen, Empfehlung und Risiken.");
+
+                let result = shortcuts.join(' ') + (shortcuts.length ? "\n\n" : "") + base;
+                if(mods.length) result += "\n\n---\n" + mods.join("\n");
+                finalOutput.value = result;
+
+                // Sidebar Marker (Die Krone am Menüpunkt)
+                menuItems.forEach(li => {
+                    const pane = document.getElementById(li.dataset.target);
+                    const isChecked = pane.querySelectorAll('input:checked').length > 0;
+                    li.classList.toggle('has-content', isChecked);
+                });
+            }
+
+            // --- Event Listeners ---
+            document.querySelectorAll('input').forEach(i => i.onchange = update);
+            document.querySelectorAll('input[type="text"]').forEach(i => i.oninput = update);
+            baseInput.oninput = update;
+
+            document.getElementById('theme-toggle').onclick = () => document.body.classList.toggle('dark-mode');
+            document.getElementById('reset-button').onclick = () => { if(confirm("Alles zurücksetzen?")) location.reload(); };
+            document.getElementById('copy-button').onclick = function() {
+                finalOutput.select();
+                navigator.clipboard.writeText(finalOutput.value);
+                const fb = this.querySelector('.copy-feedback');
+                fb.style.display = 'block';
+                setTimeout(() => fb.style.display = 'none', 1500);
+            };
+        });
+    </script>
 </body>
 </html>
